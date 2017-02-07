@@ -66,24 +66,58 @@ module.exports = EngineAddon.extend({
     });
   },
 
-  included: function(app, parentAddon) {
-    this._super.included(app);
+  config: function(/*environment, appConfig*/) {
+    return {
+      remarkable: {
+        excludeHighlightJs: false
+      }
+    }
+  },
 
-    var target = app || parentAddon;
-    if (target.import) {
-      target.import(target.bowerDirectory + '/remarkable/dist/remarkable.js');
-      target.import(target.bowerDirectory + '/highlightjs/highlight.pack.js');
-      target.import('vendor/ember-remarkable/shim.js', {
-        type: 'vendor',
-        exports: { 'remarkable': ['default'] }
-      });
-      target.import('vendor/ember-remarkable/highlightjs-shim.js', {
-        type: 'vendor',
-        exports: { 'hljs': ['default'] }
-      });
+  included: function(app) {
+    this._super.included.apply(this, arguments);
+
+    var bowerDirectory = this.project.bowerDirectory;
+    var importContext;
+
+    if (this.import) {  // support for ember-cli >= 2.7
+      importContext = this;
+    } else { // addon support for ember-cli < 2.7
+      importContext = this._findHostForLegacyEmberCLI();
     }
 
+    var env = app.env;
+    var config = this.project.config(env || 'development');
+    var excludeHighlightJs = config.remarkable.excludeHighlightJs;
+
+    importContext.import(bowerDirectory + '/remarkable/dist/remarkable.js');
+    if (!excludeHighlightJs) {
+      importContext.import(bowerDirectory + '/highlightjs/highlight.pack.js');
+    }
+    importContext.import('vendor/ember-remarkable/shim.js', {
+      type: 'vendor',
+      exports: { 'remarkable': ['default'] }
+    });
   },
+
+  // included: function(app, parentAddon) {
+  //   this._super.included(app);
+  //
+  //   var target = app || parentAddon;
+  //   if (target.import) {
+  //     target.import(target.bowerDirectory + '/remarkable/dist/remarkable.js');
+  //     target.import(target.bowerDirectory + '/highlightjs/highlight.pack.js');
+  //     target.import('vendor/ember-remarkable/shim.js', {
+  //       type: 'vendor',
+  //       exports: { 'remarkable': ['default'] }
+  //     });
+  //     target.import('vendor/ember-remarkable/highlightjs-shim.js', {
+  //       type: 'vendor',
+  //       exports: { 'hljs': ['default'] }
+  //     });
+  //   }
+  //
+  // },
 
   isDevelopingAddon: function() {
     return false;
