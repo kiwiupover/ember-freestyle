@@ -10,8 +10,11 @@ var freestyleUsageSnippetFinder = require('./freestyle-usage-snippet-finder');
 var Funnel = require('broccoli-funnel');
 var unwatchedTree  = require('broccoli-unwatched-tree');
 
-module.exports = {
+const EngineAddon = require('ember-engines/lib/engine-addon');
+
+module.exports = EngineAddon.extend({
   name: 'ember-freestyle',
+  lazyLoading: true,
 
   treeForApp: function(tree) {
     var treesToMerge = [tree];
@@ -85,4 +88,4 @@ module.exports = {
   isDevelopingAddon: function() {
     return false;
   }
-};
+});
