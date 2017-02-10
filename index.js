@@ -80,9 +80,9 @@ module.exports = {
     var config = this.project.config(env || 'development');
     var excludeHighlightJs = config.remarkable.excludeHighlightJs;
 
-    importContext.import(bowerDirectory + '/remarkable/dist/remarkable.js');
+    importContext.import(path.join(this.project.path, bowerDirectory, '/remarkable/dist/remarkable.js'));
     if (!excludeHighlightJs) {
-      importContext.import(bowerDirectory + '/highlightjs/highlight.pack.js');
+      importContext.import(path.join(this.project.path, bowerDirectory, '/highlightjs/highlight.pack.js'));
     }
     importContext.import('vendor/ember-remarkable/shim.js', {
       type: 'vendor',
