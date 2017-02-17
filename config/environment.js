@@ -2,5 +2,9 @@
 'use strict';
 
 module.exports = function(/* environment, appConfig */) {
-  return { };
+  return {
+    remarkable: {
+      excludeHighlightJs: false
+    }
+  };
 };
