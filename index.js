@@ -73,7 +73,7 @@ module.exports = {
         type: 'vendor',
         exports: { 'hljs': ['default'] }
       });
-      target.import(target.bowerDirectory + '/markdown-it/dist/markdown-it.min.js');
+      
       target.import('vendor/shims/markdown-it.js');
     }
 

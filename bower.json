@@ -3,7 +3,6 @@
   "dependencies": {
     "ember": "~2.8.0",
     "ember-cli-shims": "0.1.1",
-    "highlightjs": "9.7.0",
-    "markdown-it": "8.0.1"
+    "highlightjs": "9.7.0"
   }
 }
