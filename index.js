@@ -1,6 +1,6 @@
 /* globals require, module */
 'use strict';
-var mergeTrees = require('broccoli-merge-trees');
+var MergeTrees = require('broccoli-merge-trees');
 var stew = require('broccoli-stew');
 var path = require('path');
 var fs   = require('fs');
@@ -17,11 +17,11 @@ module.exports = {
     var treesToMerge = [tree];
     var self = this;
 
-    var snippets = mergeTrees(this.snippetPaths().filter(function(path) {
+    var snippets = MergeTrees(this.snippetPaths().filter(function(path) {
       return fs.existsSync(path);
     }));
 
-    snippets = mergeTrees(this.snippetSearchPaths().map(function(path) {
+    snippets = MergeTrees(this.snippetSearchPaths().map(function(path) {
       return freestyleUsageSnippetFinder(path, self.ui);
     }).concat(snippets));
 
@@ -30,7 +30,7 @@ module.exports = {
     });
     treesToMerge.push(snippets);
 
-    return mergeTrees(treesToMerge);
+    return MergeTrees(treesToMerge);
   },
 
   snippetPaths: function() {
@@ -52,15 +52,23 @@ module.exports = {
   treeForStyles: function(tree) {
     tree = this._super.treeForStyles.apply(this, [tree]);
 
-    var highlightJsTree = new Funnel(unwatchedTree(path.dirname(require.resolve('highlight.js/package.json'))), {
+    var highlightJsTree = new Funnel(unwatchedTree(path.dirname(require.resolve('highlightjs/package.json'))), {
       srcDir: '/styles',
       destDir: '/app/styles/ember-freestyle/highlight.js'
     });
     highlightJsTree = stew.rename(highlightJsTree, '.css', '.scss');
 
-    return mergeTrees([highlightJsTree, tree], {
+    return MergeTrees([highlightJsTree, tree], {
       overwrite: true
     });
+  },
+
+  treeForVendor(vendorTree) {
+    var highlightTree = new Funnel(path.join(this.project.root, 'node_modules', 'highlightjs'), {
+      files: ['highlight.pack.js'],
+    });
+
+    return new MergeTrees([vendorTree, highlightTree]);
   },
 
   included: function(app, parentAddon) {
@@ -68,12 +76,19 @@ module.exports = {
 
     var target = app || parentAddon;
     if (target.import) {
-      target.import(target.bowerDirectory + '/highlightjs/highlight.pack.js');
-      target.import('vendor/ember-freestyle/highlightjs-shim.js', {
-        type: 'vendor',
-        exports: { 'hljs': ['default'] }
+
+      target.import('vendor/highlight.pack.js', {
+        exports: {
+          'highlight.js': [
+            'default',
+            'highlight',
+            'highlightAuto',
+            'highlightBlock'
+          ]
+        }
       });
-      
+
+      target.import('vendor/shims/highlight.js');
       target.import('vendor/shims/markdown-it.js');
     }
 

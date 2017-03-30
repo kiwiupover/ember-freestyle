@@ -1,6 +1,6 @@
-/* global hljs */
 import Ember from 'ember';
 import md from 'markdown-it';
+import highlight from 'highlight';
 
 const {
   String: EmString,
@@ -16,10 +16,10 @@ export function freestyleMarkdown(params/*, hash*/) {
   let [markdown] = params;
   let html = md({
     highlight: function (str, lang) {
-      if (lang && hljs.getLanguage(lang)) {
+      if (lang && highlight.getLanguage(lang)) {
         // try {
           return '<pre class="hljs"><code>' +
-            hljs.highlight(lang, str, true).value +
+            highlight.highlight(lang, str, true).value +
             '</code></pre>';
         // } catch (__) {
 
