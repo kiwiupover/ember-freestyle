@@ -68,18 +68,14 @@ module.exports = {
       files: ['highlight.pack.js'],
     });
 
-    let vendorTreeDebug =  new MergeTrees([tree, highlightTree], {
+    return new MergeTrees([tree, highlightTree], {
       overwrite: true
     });
-
-    let loggedApp = debug(vendorTreeDebug, { name: 'vendorTreeDebug' });
-
-    return loggedApp
   },
 
   included: function(app) {
     this._super.included(app);
-    console.log('include ember-freestyle');
+
     this.import('vendor/highlight.pack.js', {
       exports: {
         'highlight.js': [
