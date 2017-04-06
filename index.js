@@ -10,11 +10,12 @@ var freestyleUsageSnippetFinder = require('./freestyle-usage-snippet-finder');
 var Funnel = require('broccoli-funnel');
 var unwatchedTree  = require('broccoli-unwatched-tree');
 
+const debug = require('broccoli-stew').debug;
+
 module.exports = {
   name: 'ember-freestyle',
 
   treeForApp: function(tree) {
-    var treesToMerge = [tree];
     var self = this;
 
     var snippets = MergeTrees(this.snippetPaths().filter(function(path) {
@@ -28,9 +29,8 @@ module.exports = {
     snippets = flatiron(snippets, {
       outputFile: 'snippets.js'
     });
-    treesToMerge.push(snippets);
 
-    return MergeTrees(treesToMerge);
+    return new MergeTrees([tree, snippets]);
   },
 
   snippetPaths: function() {
@@ -63,35 +63,37 @@ module.exports = {
     });
   },
 
-  treeForVendor(vendorTree) {
+  treeForVendor(tree) {
     var highlightTree = new Funnel(path.join(this.project.root, 'node_modules', 'highlightjs'), {
       files: ['highlight.pack.js'],
     });
 
-    return new MergeTrees([vendorTree, highlightTree]);
+    let vendorTreeDebug =  new MergeTrees([tree, highlightTree], {
+      overwrite: true
+    });
+
+    let loggedApp = debug(vendorTreeDebug, { name: 'vendorTreeDebug' });
+
+    return loggedApp
   },
 
-  included: function(app, parentAddon) {
+  included: function(app) {
     this._super.included(app);
+    console.log('include ember-freestyle');
+    this.import('vendor/highlight.pack.js', {
+      exports: {
+        'highlight.js': [
+          'default',
+          'highlight',
+          'highlightAuto',
+          'highlightBlock'
+        ]
+      }
+    });
+    this.import('vendor/markdown-it.min.js');
 
-    var target = app || parentAddon;
-    if (target.import) {
-
-      target.import('vendor/highlight.pack.js', {
-        exports: {
-          'highlight.js': [
-            'default',
-            'highlight',
-            'highlightAuto',
-            'highlightBlock'
-          ]
-        }
-      });
-
-      target.import('vendor/shims/highlight.js');
-      target.import('vendor/shims/markdown-it.js');
-    }
-
+    this.import('vendor/shims/highlight.js');
+    this.import('vendor/shims/markdown-it.js');
   },
 
   isDevelopingAddon: function() {
